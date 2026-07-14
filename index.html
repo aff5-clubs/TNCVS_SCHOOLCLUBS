@@ -67,7 +67,6 @@
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
     }
 
-    /* 隱藏滾動條 */
     .no-scrollbar::-webkit-scrollbar {
       display: none;
     }
@@ -79,25 +78,24 @@
 </head>
 <body class="text-[#4a3e3d] min-h-screen pb-16">
 
-  <!-- JavaScript 頂端配置 (優先權最低的預設值) -->
+  <!-- JavaScript 頂端配置 -->
   <script>
     // 預設的 GAS 網址。使用者若想固定，可直接在此填入。
     const DEFAULT_GAS_URL = "";
 
-    // 管理密碼（學生會與管理者專屬），預設為台南高商英文簡寫。您可以隨時修改此變數。
+    // 管理密碼（學生會與管理者專屬），預設為台南高商英文簡寫。
     const ADMIN_PASSWORD = "ntcvs";
   </script>
 
   <!-- 導航列 -->
   <nav class="sticky top-0 z-40 bg-[#fcf8f2] border-b-2 border-[#5c4d4d] px-4 py-3 shadow-sm">
     <div class="max-w-6xl mx-auto flex items-center justify-between">
-      <!-- 左側 Logo，附帶點擊彩蛋功能與校徽雙模降級防呆 -->
+      <!-- 左側 Logo 與校徽降級防呆 -->
       <div class="flex items-center gap-2 cursor-pointer select-none" id="logo-trigger" title="管理者快速通道">
-        <div class="bg-[#ffaf7a] p-1.5 rounded-full border-2 border-[#5c4d4d] shadow-[2px_2px_0px_#5c4d4d] w-11 h-11 flex items-center justify-center overflow-hidden">
-          <!-- 雙模校徽：如果本機有圖片則載入圖片，否則 onerror 自動切換顯示為具有南商手繪風質感的中文徽章 -->
-          <img id="school-logo-nav" src="logo (2).jpg" class="w-full h-full object-contain" 
+        <div class="bg-white rounded-full border-2 border-[#5c4d4d] shadow-[3px_3px_0px_#5c4d4d] w-12 h-12 flex items-center justify-center overflow-hidden relative">
+          <img id="school-logo-nav" src="logo (2).jpg" class="w-[95%] h-[95%] object-contain rounded-full" 
                onerror="this.style.display='none'; document.getElementById('school-logo-fallback-nav').style.display='flex';" />
-          <div id="school-logo-fallback-nav" class="hidden w-full h-full bg-[#ffaf7a] text-[#4a3e3d] font-black text-sm flex items-center justify-center tracking-tighter" style="font-family: 'Yomogi', sans-serif;">
+          <div id="school-logo-fallback-nav" class="hidden absolute inset-0 bg-[#ffaf7a] text-[#4a3e3d] font-black text-sm flex items-center justify-center tracking-tighter" style="font-family: 'Yomogi', sans-serif;">
             南商
           </div>
         </div>
@@ -114,7 +112,10 @@
           <i data-lucide="plus-circle" class="w-4 h-4"></i>
           <span>新增/管理社團</span>
         </button>
-        <!-- ⚙️ 設定鍵與 ℹ️ 說明鍵預設加上 hidden，僅管理模式可見 -->
+        <!-- 📥 審核大廳按鈕 -->
+        <button id="btn-moderation" class="handdrawn-btn p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 flex items-center justify-center hidden" title="📥 審核大廳">
+          <i data-lucide="shield-check" class="w-5 h-5"></i>
+        </button>
         <button id="btn-settings" class="handdrawn-btn p-2 bg-white hover:bg-gray-100 flex items-center justify-center hidden" title="連線設定">
           <i data-lucide="settings" class="w-5 h-5"></i>
         </button>
@@ -139,7 +140,7 @@
         <span class="text-xs font-bold uppercase tracking-widest bg-[#ffddaa] text-[#b36b00] px-3 py-1 rounded-full border border-[#b36b00]">南商專屬社團指南</span>
         <h2 class="text-2xl md:text-4xl font-extrabold text-[#3a2f2e] leading-snug">探索興趣、閃耀青春！找到最契合你的理想社團 ✨</h2>
         <p class="text-base text-gray-600 leading-relaxed">
-          資訊完全透明化！在這裡，你可以直接確認社費、活動時間、練習地點，一鍵瀏覽學長姐精心設計的成果影片與精彩生活牆。不再為資訊不對稱而煩惱。
+          資訊完全透明化！在這裡，你可以直接確認社費、活動時間、練習地點，一鍵瀏覽學長姐精心設計的成果影片與精彩生活牆。
         </p>
         <div class="flex flex-wrap gap-2 pt-2">
           <span class="text-sm bg-stone-100 border border-stone-300 px-3 py-1 rounded-full text-stone-600 flex items-center gap-1">
@@ -162,12 +163,10 @@
       </div>
     </div>
 
-    <!-- 篩選列 -->
+    <!-- 篩選與搜尋列 -->
     <div class="flex flex-col md:flex-row gap-4 items-center justify-between mb-6">
-      <!-- 分類分頁 -->
-      <div class="flex flex-wrap gap-2 w-full md:w-auto" id="category-filter-container">
-        <!-- JS 動態生成分類按鈕 -->
-      </div>
+      <!-- 分類按鈕動態生成容器 -->
+      <div class="flex flex-wrap gap-2 w-full md:w-auto" id="category-filter-container"></div>
 
       <!-- 搜尋框 -->
       <div class="relative w-full md:w-72">
@@ -185,19 +184,16 @@
         <div class="h-40 bg-gray-200 rounded-lg"></div>
         <div class="h-6 bg-gray-200 rounded w-2/3"></div>
         <div class="h-4 bg-gray-200 rounded w-full"></div>
-        <div class="h-4 bg-gray-200 rounded w-5/6"></div>
       </div>
       <div class="handdrawn-card p-6 space-y-4 animate-pulse bg-white">
         <div class="h-40 bg-gray-200 rounded-lg"></div>
         <div class="h-6 bg-gray-200 rounded w-1/3"></div>
-        <div class="h-4 bg-gray-200 rounded w-full"></div>
         <div class="h-4 bg-gray-200 rounded w-full"></div>
       </div>
       <div class="handdrawn-card p-6 space-y-4 animate-pulse bg-white">
         <div class="h-40 bg-gray-200 rounded-lg"></div>
         <div class="h-6 bg-gray-200 rounded w-1/2"></div>
         <div class="h-4 bg-gray-200 rounded w-full"></div>
-        <div class="h-4 bg-gray-200 rounded w-3/4"></div>
       </div>
     </div>
 
@@ -207,21 +203,19 @@
         <i data-lucide="folder-search" class="w-10 h-10 text-amber-500"></i>
       </div>
       <h3 class="text-xl font-bold mb-2">找不到符合條件的社團</h3>
-      <p class="text-gray-500 mb-6 max-w-md mx-auto">我們找不到與關鍵字或分類相符的社團。要不要試試其他關鍵字，或是自行點擊「新增/管理社團」建立新資料呢？</p>
+      <p class="text-gray-500 mb-6 max-w-md mx-auto">我們找不到與關鍵字或分類相符的社團。要不要試試其他關鍵字呢？</p>
       <button id="btn-reset-filters" class="handdrawn-btn px-4 py-2 bg-[#ffaf7a] hover:bg-[#ff9e59] font-bold text-sm">
         重設所有篩選
       </button>
     </div>
 
     <!-- 社團卡片列表 -->
-    <div id="clubs-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
-      <!-- JS 動態渲染社團卡片 -->
-    </div>
+    <div id="clubs-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden"></div>
 
   </main>
 
   <!-- 0. 密碼驗證鎖定 Modal -->
-  <div id="password-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden p-4">
+  <div id="password-modal" class="fixed inset-0 z-[80] flex items-center justify-center hidden p-4">
     <div class="absolute inset-0 bg-[#4a3e3d]/40 backdrop-blur-sm"></div>
     <div class="bg-white rounded-2xl border-3 border-[#5c4d4d] shadow-[8px_8px_0px_#5c4d4d] max-w-sm w-full p-6 relative z-10 transform scale-95 opacity-0 transition-all duration-300" id="password-modal-container">
       <div class="flex items-start gap-4 mb-4">
@@ -230,7 +224,7 @@
         </div>
         <div class="flex-1">
           <h3 class="text-lg font-bold text-[#4a3e3d] mb-1">管理權限密碼鎖</h3>
-          <p class="text-xs text-gray-500">此為學生會與系統管理專區，請輸入管理密碼以繼續設定：</p>
+          <p class="text-xs text-gray-500">此為學校管理專區，請輸入管理密碼以繼續設定：</p>
         </div>
       </div>
       <input type="password" id="input-admin-pass" placeholder="請輸入密碼" class="w-full px-3 py-2 border-2 border-[#5c4d4d] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffaf7a] bg-white text-sm mb-4" />
@@ -241,8 +235,8 @@
     </div>
   </div>
 
-  <!-- 1. 通用自訂 Modal 系統 -->
-  <div id="common-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden p-4">
+  <!-- 1. 通用自訂 Modal 系統 ── z-[100] 最前台 -->
+  <div id="common-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden p-4">
     <div class="absolute inset-0 bg-[#4a3e3d]/40 backdrop-blur-sm transition-opacity duration-300"></div>
     <div class="bg-white rounded-2xl border-3 border-[#5c4d4d] shadow-[8px_8px_0px_#5c4d4d] max-w-md w-full p-6 relative z-10 transform scale-95 opacity-0 transition-all duration-300" id="common-modal-container-box">
       <div class="flex items-start gap-4">
@@ -260,7 +254,84 @@
     </div>
   </div>
 
-  <!-- 2. 設定 Modal -->
+  <!-- 1.5. AI 智慧優化對比視窗 Modal ── z-[90] -->
+  <div id="ai-preview-modal" class="fixed inset-0 z-[90] flex items-center justify-center hidden p-4">
+    <div class="absolute inset-0 bg-[#4a3e3d]/40 backdrop-blur-sm"></div>
+    <div class="bg-white rounded-2xl border-3 border-[#5c4d4d] shadow-[8px_8px_0px_#5c4d4d] max-w-xl w-full p-6 relative z-10 overflow-y-auto max-h-[90vh] paper-texture">
+      <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-2">
+        <h3 class="text-lg font-bold flex items-center gap-1.5 text-indigo-700">
+          <i data-lucide="sparkles" class="w-5 h-5"></i> AI 文案優化成果比對
+        </h3>
+        <button id="btn-close-ai-preview" class="p-1 hover:bg-gray-100 rounded-full border border-gray-200">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      
+      <div class="space-y-4">
+        <p class="text-xs text-gray-500">AI 已為您精心潤飾招生文案！請比對前後差異：</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="space-y-1">
+            <span class="text-xs font-bold text-gray-400 block">原本草稿 (Before)</span>
+            <div id="ai-preview-original" class="p-3 bg-stone-50 border border-stone-200 rounded-xl text-xs text-gray-500 min-h-[150px] max-h-[250px] overflow-y-auto whitespace-pre-wrap"></div>
+          </div>
+          <div class="space-y-1">
+            <span class="text-xs font-bold text-indigo-600 block flex items-center gap-1">✨ AI 推薦文案 (After)</span>
+            <div id="ai-preview-optimized" class="p-3 bg-indigo-50/50 border border-indigo-200 rounded-xl text-xs text-indigo-900 min-h-[150px] max-h-[250px] overflow-y-auto whitespace-pre-wrap font-medium"></div>
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-4 border-t border-gray-100">
+          <button id="btn-ai-preview-reject" class="handdrawn-btn px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-sm">
+            不採用，保留原本
+          </button>
+          <button id="btn-ai-preview-accept" class="handdrawn-btn px-5 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold text-sm flex items-center gap-1">
+            <i data-lucide="sparkles" class="w-4 h-4"></i> 採用 AI 文案
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1.8 📥 官方審核大廳 Modal ── z-[75] -->
+  <div id="moderation-modal" class="fixed inset-0 z-[75] flex items-center justify-center hidden p-4">
+    <div class="absolute inset-0 bg-[#4a3e3d]/40 backdrop-blur-sm"></div>
+    <div class="bg-white rounded-2xl border-3 border-[#5c4d4d] shadow-[8px_8px_0px_#5c4d4d] max-w-4xl w-full p-6 relative z-10 overflow-y-auto max-h-[90vh] paper-texture">
+      <div class="flex justify-between items-center mb-4 border-b-2 border-[#5c4d4d] pb-2">
+        <h3 class="text-xl font-bold flex items-center gap-2">
+          <i data-lucide="shield-check" class="w-6 h-6 text-blue-600"></i> 📥 社團審核管理大廳
+        </h3>
+        <button id="btn-close-moderation" class="p-1 hover:bg-gray-100 rounded-full border border-gray-200">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <div class="p-3 bg-blue-50 text-blue-800 rounded-xl text-xs font-semibold">
+          💡 管理者提醒：學生前台預設「只會看見審核狀態為『已通過』的社團」。新提交的社團預設為「待審核」，請於下方列表點擊按鈕進行審核。
+        </div>
+
+        <!-- 審核清單列表 -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm text-left text-gray-500 border-2 border-[#5c4d4d] rounded-xl overflow-hidden divide-y divide-[#5c4d4d]">
+            <thead class="text-xs text-[#4a3e3d] uppercase bg-[#ffeeda]">
+              <tr class="divide-x divide-[#5c4d4d]">
+                <th scope="col" class="px-4 py-3 font-bold">社團名稱</th>
+                <th scope="col" class="px-4 py-3 font-bold">分類</th>
+                <th scope="col" class="px-4 py-3 font-bold">時間 / 地點</th>
+                <th scope="col" class="px-4 py-3 font-bold">預估社費</th>
+                <th scope="col" class="px-4 py-3 font-bold text-center">目前狀態</th>
+                <th scope="col" class="px-4 py-3 font-bold text-center">審核操作</th>
+              </tr>
+            </thead>
+            <tbody id="moderation-list-rows" class="bg-white divide-y divide-[#5c4d4d]">
+              <!-- JS 動態生成 rows -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 設定 Modal ── z-50 -->
   <div id="settings-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden p-4">
     <div class="absolute inset-0 bg-[#4a3e3d]/40 backdrop-blur-sm"></div>
     <div class="bg-white rounded-2xl border-3 border-[#5c4d4d] shadow-[8px_8px_0px_#5c4d4d] max-w-lg w-full p-6 relative z-10 overflow-y-auto max-h-[90vh]">
@@ -274,7 +345,6 @@
       </div>
 
       <div class="space-y-4">
-        <!-- GAS Web App URL -->
         <div class="space-y-1">
           <label class="block text-sm font-bold text-[#4a3e3d]">GAS API Web App 網址：</label>
           <input type="password" id="input-gas-url" placeholder="貼上部署好的 GAS 巨集執行網址" 
@@ -282,17 +352,15 @@
           <p class="text-xs text-gray-500">網址輸入已自動遮蔽。若未設定，將顯示唯讀示範資料。</p>
         </div>
 
-        <!-- Gemini API Key -->
         <div class="space-y-1">
           <label class="block text-sm font-bold text-[#4a3e3d]">Gemini API 金鑰 (選填)：</label>
           <input type="password" id="input-gemini-key" placeholder="貼上您的 Gemini API Key" 
             class="w-full px-3 py-2 border-2 border-[#5c4d4d] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffaf7a] bg-white text-sm" />
           <p class="text-xs text-gray-500">
-            用來優化社團簡介文案。在本機與外部發布環境，必須填寫此 Key 才能正常運作 AI 優化器；在 Gemini Canvas 預覽環境下留空即可直接免 Key 測試。
+            用來優化社團簡介文案。在本機與外部發布環境下，請務必填寫此金鑰；若在 Canvas 預覽環境下測試，保持空白即可。
           </p>
         </div>
 
-        <!-- 填寫通道開關 -->
         <div class="p-3 bg-amber-50 rounded-xl border-2 border-[#5c4d4d] flex items-center justify-between">
           <div>
             <span class="block text-sm font-bold text-[#4a3e3d]">🔒 關閉前台新增與編輯功能</span>
@@ -301,7 +369,6 @@
           <input type="checkbox" id="input-close-form" class="w-5 h-5 text-amber-500 border-2 border-[#5c4d4d] rounded focus:ring-amber-400 cursor-pointer" />
         </div>
 
-        <!-- 按鈕操作 -->
         <div class="flex flex-wrap gap-2 pt-2 border-t border-gray-200 justify-between">
           <button id="btn-clear-settings" class="handdrawn-btn px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 font-bold text-xs flex items-center gap-1">
             <i data-lucide="trash-2" class="w-4 h-4"></i> 清除/重置設定
@@ -311,21 +378,18 @@
           </button>
         </div>
 
-        <!-- 分享與 QR Code 區塊 -->
         <div class="border-t border-gray-200 pt-4 space-y-3">
           <h4 class="font-bold text-sm flex items-center gap-1"><i data-lucide="share-2" class="w-4 h-4 text-[#ff9e59]"></i> 產生專屬分享連結與二維碼</h4>
-          <p class="text-xs text-gray-500">系統會對您的設定進行加密封裝，生成隨點即用的專屬連結（包含您是否勾選關閉通道）。產生後的網址中會自動**不包含**設定與部署指南按鈕，確保學生環境乾淨安全。</p>
           <button id="btn-generate-share" class="handdrawn-btn w-full py-2 bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold text-xs flex items-center justify-center gap-1">
             <i data-lucide="qr-code" class="w-4 h-4"></i> 產生分享連結與 QR Code
           </button>
 
-          <!-- 產生成果顯示 -->
-          <div id="share-result-container" class="hidden p-4 bg-stone-50 border border-stone-200 rounded-xl space-y-3 animate-fade-in">
+          <div id="share-result-container" class="hidden p-4 bg-stone-50 border border-stone-200 rounded-xl space-y-3">
             <div class="space-y-1">
               <span class="text-xs font-bold text-gray-500">專屬短網址：</span>
               <div class="flex gap-1">
                 <input type="text" id="output-share-url" readonly class="flex-1 bg-white border border-stone-300 text-xs p-1.5 rounded focus:outline-none" />
-                <button id="btn-copy-share-url" class="px-3 bg-stone-200 hover:bg-stone-300 text-xs font-bold rounded flex items-center justify-center">複製</button>
+                <button id="btn-copy-share-url" class="px-3 bg-stone-200 hover:bg-stone-300 text-xs font-bold rounded">複製</button>
               </div>
             </div>
             <div class="flex flex-col items-center justify-center pt-2">
@@ -340,7 +404,7 @@
     </div>
   </div>
 
-  <!-- 3. 說明 Modal (ℹ️) -->
+  <!-- 3. 說明 Modal (ℹ️) ── z-50 -->
   <div id="info-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden p-4">
     <div class="absolute inset-0 bg-[#4a3e3d]/40 backdrop-blur-sm"></div>
     <div class="bg-white rounded-2xl border-3 border-[#5c4d4d] shadow-[8px_8px_0px_#5c4d4d] max-w-3xl w-full p-6 relative z-10 overflow-y-auto max-h-[90vh]">
@@ -358,13 +422,11 @@
           <h4 class="font-bold text-base text-[#c37e00] border-b border-[#ffd999] pb-1 mb-2">🌟 三分鐘極速建置指南</h4>
           <ol class="list-decimal pl-5 space-y-2">
             <li>準備一個 <strong>Google 試算表</strong>。</li>
-            <li>在該試算表中點選頂部選單 <strong>「擴充功能」 &gt; 「Apps Script」</strong>。</li>
-            <li>清空原有的程式碼，貼上右方拷貝的最新後端 Script 代碼。</li>
-            <li>點選右上角 <strong>「部署」 &gt; 「新增部署」</strong>。</li>
-            <li>設定類型為 <strong>「網頁應用程式 (Web App)」</strong>。</li>
-            <li>將專案說明填入，執行身分設定為 <strong>「我自己」</strong>，誰可以存取設定為 <strong>「任何人」</strong>。</li>
-            <li>按「部署」並授權，複製產生的 <strong>網頁應用程式網址</strong>。</li>
-            <li>回到此頁面，點選右上角 <strong>⚙️ 設定按鈕</strong>，貼上該網址即可完成資料庫對接與全自動資料庫初始化！</li>
+            <li>點選 <strong>「擴充功能」 &gt; 「Apps Script」</strong>。</li>
+            <li>清空原程式碼，貼上右方後端 Script 代碼。</li>
+            <li>點選 <strong>「部署」 &gt; 「新增部署」</strong>，類型選 <strong>「網頁應用程式」</strong>。</li>
+            <li>執行身分為 <strong>「我自己」</strong>，誰可以存取設定為 <strong>「任何人」</strong>。</li>
+            <li>按部署並授權，複製網址貼回設定齒輪中！</li>
           </ol>
         </div>
 
@@ -383,21 +445,47 @@
     </div>
   </div>
 
-  <!-- 4. 新增/管理社團 Modal (Admin Panel) -->
+  <!-- 4. 新增/管理社團 Modal ── z-50 -->
   <div id="admin-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden p-4">
     <div class="absolute inset-0 bg-[#4a3e3d]/40 backdrop-blur-sm"></div>
-    <div class="bg-white rounded-2xl border-3 border-[#5c4d4d] shadow-[8px_8px_0px_#5c4d4d] max-w-2xl w-full p-6 relative z-10 overflow-y-auto max-h-[95vh]">
+    <div class="bg-white rounded-2xl border-3 border-[#5c4d4d] shadow-[8px_8px_0px_#5c4d4d] max-w-2xl w-full p-6 relative z-10 overflow-y-auto max-h-[95vh] paper-texture">
+      
       <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-2">
         <h3 class="text-xl font-bold flex items-center gap-2">
-          <i data-lucide="edit-3" class="w-6 h-6 text-[#88b04b]"></i> 新增/編輯社團資訊
+          <i data-lucide="edit-3" class="w-6 h-6 text-[#88b04b]"></i> 填寫與新增社團
         </h3>
         <button id="btn-close-admin" class="p-1 hover:bg-gray-100 rounded-full border border-gray-200">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <form id="club-form" class="space-y-4">
-        <!-- 社團基本資料 -->
+      <!-- 說明頁 (審核版) -->
+      <div id="admin-guide-panel" class="space-y-4">
+        <div class="p-4 bg-[#ffeeda] border-2 border-dashed border-[#5c4d4d] rounded-2xl space-y-3">
+          <h4 class="font-extrabold text-lg text-[#3a2f2e] flex items-center gap-1.5">
+            <i data-lucide="clipboard-list" class="w-5 h-5 text-[#ff9e59]"></i> 填寫與上傳須知
+          </h4>
+          <p class="text-xs text-gray-500">親愛的社長您好！請注意本平台已啟用<strong>官方審核機制</strong>：</p>
+          <ul class="space-y-2.5 text-xs text-[#4a3e3d] font-medium pl-1">
+            <li class="flex items-start gap-2">
+              <span class="flex-shrink-0 bg-[#ffaf7a] text-white rounded-full w-4 h-4 flex items-center justify-center font-bold text-[10px] mt-0.5">1</span>
+              <span><strong>🔒 學校官方審核流程：</strong> 表單提交後，資料將直接送至 <strong>「台南高商社團活動組」</strong> 進行審核。審核無誤通過後，您的社團才會正式公開出現在下方列表中。</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="flex-shrink-0 bg-[#ffaf7a] text-white rounded-full w-4 h-4 flex items-center justify-center font-bold text-[10px] mt-0.5">2</span>
+              <span><strong>⚠️ 勿重複提交：</strong> 若上傳後需要修改，請直接聯繫社團活動組老師在雲端試算表直接修正，請勿重複提交。</span>
+            </li>
+          </ul>
+        </div>
+        <div class="flex justify-end pt-2">
+          <button type="button" id="btn-agree-guidelines" class="handdrawn-btn w-full sm:w-auto px-6 py-2.5 bg-[#bce3c5] hover:bg-[#a9d7b3] font-extrabold text-sm flex items-center justify-center gap-1.5">
+            <i data-lucide="check-square" class="w-4 h-4"></i> 我已閱讀並同意，開始填寫
+          </button>
+        </div>
+      </div>
+
+      <!-- 表單 -->
+      <form id="club-form" class="space-y-4 hidden">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="space-y-1">
             <label class="block text-xs font-bold text-gray-600">社團名稱 *</label>
@@ -406,7 +494,7 @@
           </div>
           <div class="space-y-1">
             <label class="block text-xs font-bold text-gray-600">社團分類 *</label>
-            <select id="form-category" required class="w-full px-3 py-1.5 border-2 border-[#5c4d4d] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffaf7a] text-sm bg-white">
+            <select id="form-category" required class="w-full px-3 py-1.5 border-2 border-[#5c4d4d] rounded-xl focus:outline-none text-sm bg-white">
               <option value="學術類">學術類</option>
               <option value="藝術類">藝術類</option>
               <option value="康樂類">康樂類</option>
@@ -421,63 +509,57 @@
           <div class="space-y-1">
             <label class="block text-xs font-bold text-gray-600">活動時間</label>
             <input type="text" id="form-time" placeholder="如：每週三下午" 
-              class="w-full px-3 py-1.5 border-2 border-[#5c4d4d] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffaf7a] text-sm" />
+              class="w-full px-3 py-1.5 border-2 border-[#5c4d4d] rounded-xl focus:outline-none text-sm" />
           </div>
           <div class="space-y-1">
             <label class="block text-xs font-bold text-gray-600">活動地點</label>
-            <input type="text" id="form-location" placeholder="如：活動中心三樓" 
-              class="w-full px-3 py-1.5 border-2 border-[#5c4d4d] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffaf7a] text-sm" />
+            <input type="text" id="form-location" placeholder="如：活動中心" 
+              class="w-full px-3 py-1.5 border-2 border-[#5c4d4d] rounded-xl focus:outline-none text-sm" />
           </div>
           <div class="space-y-1">
-            <label class="block text-xs font-bold text-gray-600">加入預期費用 (元) *</label>
+            <label class="block text-xs font-bold text-gray-600">社團費用 (元) *</label>
             <input type="number" id="form-cost" required min="0" placeholder="如：500" 
-              class="w-full px-3 py-1.5 border-2 border-[#5c4d4d] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffaf7a] text-sm" />
+              class="w-full px-3 py-1.5 border-2 border-[#5c4d4d] rounded-xl focus:outline-none text-sm" />
           </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="space-y-1">
-            <label class="block text-xs font-bold text-gray-600">成果展示 YouTube 影片連結 (選填)</label>
-            <input type="url" id="form-video" placeholder="如：https://youtu.be/..." 
-              class="w-full px-3 py-1.5 border-2 border-[#5c4d4d] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffaf7a] text-sm" />
+            <label class="block text-xs font-bold text-gray-600">成果展示 YouTube 連結</label>
+            <input type="url" id="form-video" placeholder="https://youtu.be/..." 
+              class="w-full px-3 py-1.5 border-2 border-[#5c4d4d] rounded-xl focus:outline-none text-sm" />
           </div>
           <div class="space-y-1">
-            <label class="block text-xs font-bold text-gray-600">官方社群平台連結 (選填)</label>
-            <input type="url" id="form-social" placeholder="如：https://instagram.com/..." 
-              class="w-full px-3 py-1.5 border-2 border-[#5c4d4d] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffaf7a] text-sm" />
+            <label class="block text-xs font-bold text-gray-600">官方社群平台連結</label>
+            <input type="url" id="form-social" placeholder="https://instagram.com/..." 
+              class="w-full px-3 py-1.5 border-2 border-[#5c4d4d] rounded-xl focus:outline-none text-sm" />
           </div>
         </div>
 
-        <!-- 圖片上傳區 -->
         <div class="space-y-1">
-          <label class="block text-xs font-bold text-gray-600">社團形象海報/封面圖片 (系統將等比例壓縮至 800px 以節省空間)</label>
+          <label class="block text-xs font-bold text-gray-600">封面圖片上傳</label>
           <div class="flex items-center gap-4">
-            <input type="file" id="form-image-file" accept="image/*" class="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-stone-100 file:text-stone-700 hover:file:bg-stone-200 cursor-pointer" />
+            <input type="file" id="form-image-file" accept="image/*" class="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-stone-100" />
             <div id="image-preview-container" class="hidden">
               <img id="image-preview" src="" alt="Preview" class="w-16 h-16 object-cover rounded-lg border-2 border-[#5c4d4d]" />
             </div>
           </div>
-          <!-- 隱藏欄位儲存 base64 -->
           <input type="hidden" id="form-image-base64" />
         </div>
 
-        <!-- 社團簡介 & AI 優化 -->
         <div class="space-y-1">
           <div class="flex justify-between items-center">
-            <label class="block text-xs font-bold text-gray-600">社團介紹與特色簡介 *</label>
-            <button type="button" id="btn-ai-optimize" class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs px-2.5 py-1 rounded-full hover:from-indigo-600 hover:to-purple-700 flex items-center gap-1 shadow-sm font-medium">
+            <label class="block text-xs font-bold text-gray-600">社團特色簡介 *</label>
+            <button type="button" id="btn-ai-optimize" class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm font-medium">
               <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> AI 文案美化助手
             </button>
           </div>
-          <textarea id="form-intro" required rows="4" placeholder="請詳細描寫社團核心理念、社課活動特色、年度演出 or 競賽成果等！好文案能吸引更多人加入哦！" 
-            class="w-full px-3 py-1.5 border-2 border-[#5c4d4d] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffaf7a] text-sm"></textarea>
-          <!-- AI 優化中狀態 -->
-          <p id="ai-loading-text" class="text-xs text-indigo-600 font-bold animate-pulse hidden">✨ AI 正在努力激發靈感並改寫文案，請稍候...</p>
+          <textarea id="form-intro" required rows="4" placeholder="詳細描寫社團核心理念、社課活動特色！" class="w-full px-3 py-1.5 border-2 border-[#5c4d4d] rounded-xl focus:outline-none text-sm"></textarea>
+          <p id="ai-loading-text" class="text-xs text-indigo-600 font-bold animate-pulse hidden">✨ AI 正在努力激發靈感改寫文案，請稍候...</p>
         </div>
 
-        <!-- 按鈕操作 -->
         <div class="flex justify-end gap-2 pt-4 border-t border-gray-100">
-          <button type="button" id="btn-cancel-form" class="handdrawn-btn px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-sm">取消</button>
+          <button type="button" id="btn-back-to-guide" class="handdrawn-btn px-4 py-2 bg-stone-100 text-stone-700 font-bold text-sm">返回須知</button>
           <button type="submit" id="btn-submit-form" class="handdrawn-btn px-5 py-2 bg-[#ffaf7a] hover:bg-[#ff9e59] font-bold text-sm flex items-center gap-1">
             <i data-lucide="check" class="w-4 h-4"></i> 確定儲存上傳
           </button>
@@ -486,11 +568,10 @@
     </div>
   </div>
 
-  <!-- 5. 社團詳情與對比 Modal -->
+  <!-- 5. 社團詳情 Modal -->
   <div id="detail-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden p-4">
     <div class="absolute inset-0 bg-[#4a3e3d]/40 backdrop-blur-sm"></div>
     <div class="bg-white rounded-2xl border-3 border-[#5c4d4d] shadow-[8px_8px_0px_#5c4d4d] max-w-2xl w-full p-6 relative z-10 overflow-y-auto max-h-[95vh] paper-texture">
-      <!-- 頂部與按鈕 -->
       <div class="flex justify-between items-start mb-4">
         <span id="detail-category" class="text-xs font-bold bg-[#ffddaa] px-3 py-1 rounded-full border border-[#5c4d4d]">社團分類</span>
         <button id="btn-close-detail" class="p-1 hover:bg-gray-100 rounded-full border border-gray-200">
@@ -498,24 +579,20 @@
         </button>
       </div>
 
-      <!-- 詳情 -->
       <div class="space-y-6">
         <div>
           <h2 id="detail-name" class="text-3xl font-black mb-2"></h2>
-          <div id="detail-video-container" class="hidden aspect-video w-full rounded-xl overflow-hidden border-2 border-[#5c4d4d] mb-4 shadow">
-            <!-- 影片 iframe -->
-          </div>
+          <div id="detail-video-container" class="hidden aspect-video w-full rounded-xl overflow-hidden border-2 border-[#5c4d4d] mb-4 shadow"></div>
           <div id="detail-image-container" class="hidden w-full max-h-64 rounded-xl overflow-hidden border-2 border-[#5c4d4d] mb-4">
             <img id="detail-image" src="" alt="Club Image" class="w-full h-full object-cover" />
           </div>
         </div>
 
-        <!-- 規格特點表格 -->
         <div class="border-2 border-[#5c4d4d] rounded-xl overflow-hidden bg-white">
           <div class="grid grid-cols-3 border-b-2 border-[#5c4d4d] bg-stone-50 text-xs font-bold text-gray-500 text-center divide-x-2 divide-[#5c4d4d]">
             <div class="py-2 flex items-center justify-center gap-1"><i data-lucide="clock" class="w-3.5 h-3.5 text-indigo-500"></i>活動時間</div>
             <div class="py-2 flex items-center justify-center gap-1"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-red-500"></i>活動地點</div>
-            <div class="py-2 flex items-center justify-center gap-1"><i data-lucide="dollar-sign" class="w-3.5 h-3.5 text-emerald-500"></i>預期花費</div>
+            <div class="py-2 flex items-center justify-center gap-1"><i data-lucide="dollar-sign" class="w-3.5 h-3.5 text-emerald-500"></i>社團費用</div>
           </div>
           <div class="grid grid-cols-3 text-sm font-bold text-center divide-x-2 divide-[#5c4d4d]">
             <div id="detail-time" class="py-3 px-2 text-gray-700"></div>
@@ -529,7 +606,6 @@
           <p id="detail-intro" class="text-gray-600 leading-relaxed whitespace-pre-wrap"></p>
         </div>
 
-        <!-- 底端行動區 -->
         <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-stone-100 justify-between items-center">
           <span class="text-xs text-stone-500">想要更認識我們？歡迎透過右側社群聯繫我們！</span>
           <div class="flex gap-2 w-full sm:w-auto">
@@ -543,13 +619,12 @@
     </div>
   </div>
 
-  <!-- 精美頁尾（管理標示與校徽防呆整合） -->
   <footer class="mt-16 pb-8 flex flex-col items-center justify-center text-center px-4">
-    <div class="handdrawn-card inline-flex items-center gap-2 bg-[#ffeeda] px-4 py-2 border-2 border-[#5c4d4d] shadow-[3px_3px_0px_#5c4d4d] hover:scale-105 transition-all duration-300">
-      <div class="w-6 h-6 rounded-full border-2 border-[#5c4d4d] bg-[#ffaf7a] flex items-center justify-center overflow-hidden">
-        <img id="school-logo-footer" src="logo (2).jpg" class="w-full h-full object-contain" 
+    <div class="handdrawn-card inline-flex items-center gap-2 bg-[#ffeeda] px-4 py-2 border-2 border-[#5c4d4d] shadow-[3px_3px_0px_#5c4d4d]">
+      <div class="w-7 h-7 rounded-full border-2 border-[#5c4d4d] bg-white flex items-center justify-center overflow-hidden relative">
+        <img id="school-logo-footer" src="logo (2).jpg" class="w-[95%] h-[95%] object-contain rounded-full" 
              onerror="this.style.display='none'; document.getElementById('school-logo-fallback-footer').style.display='flex';" />
-        <div id="school-logo-fallback-footer" class="hidden w-full h-full bg-[#ffaf7a] text-[#4a3e3d] font-black text-[9px] flex items-center justify-center" style="font-family: 'Yomogi', sans-serif;">
+        <div id="school-logo-fallback-footer" class="hidden absolute inset-0 bg-[#ffaf7a] text-[#4a3e3d] font-black text-[9px] flex items-center justify-center">
           南
         </div>
       </div>
@@ -557,30 +632,26 @@
         <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-600"></i> 管理者：台南高商社團活動組
       </span>
     </div>
-    <p class="text-[10px] text-gray-500 mt-2 font-medium">© 2026 台南高商 國立台南高級商業職業學校. 版權所有</p>
+    <p class="text-[10px] text-gray-500 mt-2 font-medium">© 2026 國立台南高級商業職業學校. 版權所有</p>
   </footer>
 
   <!-- 全域核心 JavaScript 邏輯 -->
   <script>
-    // 1. 初始化與優先網址取得
     let API_URL = "";
-    let FORM_CLOSED = false; // 是否已截止填寫
-    let adminClicks = 0; // 用來計數 Logo 點擊次數的彩蛋
+    let FORM_CLOSED = false;
+    let adminClicks = 0;
     
-    // 初始化從 LocalStorage / 網址參數 / 原始碼取得 GAS 網址與狀態的優先級
     function initGasUrl() {
       const urlParams = new URLSearchParams(window.location.search);
       const configParam = urlParams.get('config');
-      const isAdminQuery = urlParams.get('admin') === 'true'; // 是否網址帶有管理模式
+      const isAdminQuery = urlParams.get('admin') === 'true';
 
       if (configParam) {
         try {
-          // 網址參數優先 (進行 Base64 解碼)
           const decoded = atob(configParam);
           let parsedUrl = "";
           let isClosed = false;
 
-          // 判斷是新版 JSON 格式還是舊版單一網址
           if (decoded.trim().startsWith('{')) {
             const configObj = JSON.parse(decoded);
             parsedUrl = configObj.url || "";
@@ -594,7 +665,6 @@
             FORM_CLOSED = isClosed;
             localStorage.setItem('gas_web_app_url', parsedUrl);
             localStorage.setItem('form_closed_state', isClosed ? "true" : "false");
-            console.log("成功從 URL 參數載入配置：", API_URL, "關閉狀態：", FORM_CLOSED);
           }
         } catch(e) {
           console.error("解密 URL 參數或解析 JSON 失敗：", e);
@@ -602,36 +672,28 @@
       }
 
       if (!API_URL) {
-        // 本地 LocalStorage 優先
         const storedUrl = localStorage.getItem('gas_web_app_url');
         const storedClosed = localStorage.getItem('form_closed_state');
         if (storedUrl && storedUrl.startsWith('http')) {
           API_URL = storedUrl;
           FORM_CLOSED = storedClosed === "true";
-          console.log("成功從 LocalStorage 讀取配置：", API_URL, "關閉狀態：", FORM_CLOSED);
         }
       }
 
       if (!API_URL) {
-        // 程式預設
         if (DEFAULT_GAS_URL && DEFAULT_GAS_URL.startsWith('http')) {
           API_URL = DEFAULT_GAS_URL;
-          console.log("使用程式預設 GAS 網址：", API_URL);
         }
       }
 
-      // 【安全機制】檢查是否要解鎖顯示「設定 ⚙️」與「說明 ℹ️」按鈕
       if (isAdminQuery) {
-        unlockAdminButtons(false); // 透過網址靜默解鎖，不跳彈窗
+        unlockAdminButtons(false);
       }
 
-      // 根據通道狀態調整 UI (如果是截止狀態，把「新增/管理社團」按鈕鎖定)
       applySubmissionStateUI();
 
-      // 如果依然沒有網址，則使用模擬唯讀展示模式，並展示連線狀態橫幅
       const banner = document.getElementById('conn-banner');
       if (!API_URL) {
-        // 只有解鎖了管理員按鈕，才顯示連線警告橫幅，不干擾一般學生
         if (!document.getElementById('btn-settings').classList.contains('hidden')) {
           banner.classList.remove('hidden');
         }
@@ -640,29 +702,26 @@
       }
     }
 
-    // 彩蛋觸發器：連續點擊 Logo 5 次即可看見設定按鈕
     document.getElementById('logo-trigger').onclick = function() {
       adminClicks++;
       if (adminClicks >= 5) {
-        unlockAdminButtons(true); // 觸發解鎖並彈窗提示
+        unlockAdminButtons(true);
         adminClicks = 0;
       }
     };
 
-    // 顯現設定與說明按鈕
     function unlockAdminButtons(showAlert = true) {
       document.getElementById('btn-settings').classList.remove('hidden');
       document.getElementById('btn-info').classList.remove('hidden');
+      document.getElementById('btn-moderation').classList.remove('hidden'); // 秀出審核大廳
       if (showAlert) {
-        showModal("解鎖管理功能 🔓", "🕵️ 成功觸發隱藏彩蛋！「系統設定 ⚙️」與「部署說明 ℹ️」按鈕已出現在右上方囉！", "success");
+        showModal("解鎖管理功能 🔓", "🕵️ 成功觸發隱藏彩蛋！「審核大廳 📥」、「系統設定 ⚙️」與「部署說明 ℹ️」按鈕已出現在右上方囉！", "success");
       }
-      // 如果此時 API 未設定，則提示警告橫幅
       if (!API_URL) {
         document.getElementById('conn-banner').classList.remove('hidden');
       }
     }
 
-    // 應用填寫通道是否關閉的 UI 反饋
     function applySubmissionStateUI() {
       const adminBtn = document.getElementById('btn-admin-panel');
       if (FORM_CLOSED) {
@@ -670,60 +729,50 @@
         adminBtn.innerHTML = `<i data-lucide="lock" class="w-4 h-4"></i> <span>填寫已截止 🔒</span>`;
         adminBtn.onclick = function(e) {
           e.preventDefault();
-          showModal("填寫時間已截止", "⏳ 報名/編輯社團資訊的填寫通道已經關閉囉！\n若貴社團有極其緊急的內容需要修正，請直接聯繫「台南高商社團活動組」辦公室登記修改，非常感謝！", "info");
+          showModal("填寫時間已截止", "⏳ 填寫通道已經關閉囉！如需修正，請直接聯繫社團活動組老師，非常感謝！", "info");
         };
       } else {
-        // 正常狀態下綁定按鈕
         adminBtn.className = "handdrawn-btn px-3 py-1.5 bg-[#bce3c5] hover:bg-[#a9d7b3] font-bold text-sm flex items-center gap-1";
         adminBtn.innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4"></i> <span>新增/管理社團</span>`;
         adminBtn.onclick = function() {
+          document.getElementById('admin-guide-panel').classList.remove('hidden');
+          document.getElementById('club-form').classList.add('hidden');
           document.getElementById('admin-modal').classList.remove('hidden');
         };
       }
       lucide.createIcons();
     }
 
-    // 2. 模擬展示資料
+    document.getElementById('btn-agree-guidelines').onclick = function() {
+      document.getElementById('admin-guide-panel').classList.add('hidden');
+      document.getElementById('club-form').classList.remove('hidden');
+    };
+
+    document.getElementById('btn-back-to-guide').onclick = function() {
+      document.getElementById('club-form').classList.add('hidden');
+      document.getElementById('admin-guide-panel').classList.remove('hidden');
+    };
+
+    // 模擬展示資料 (預設待審核或已審核之比對)
     const DEMO_CLUBS_DATA = [
       {
         "社團名稱": "熱音社",
         "社團分類": "康樂類",
         "活動時間": "每週三 13:00 - 15:00",
-        "活動地點": "活動中心地下室 R102",
+        "活動地點": "活動中心 R102",
         "加入預期費用": 600,
-        "社團介紹與特色簡介": "台南高商最燃、最熱血的音樂搖籃！我們提供專業的樂器練習場地，定期舉辦學期發表、迎新、送舊與外校聯合大演。只要你喜愛音樂、想挑戰舞台，熱音社絕對是你不二的選擇！不需任何基礎，學長姐手把手教學！",
+        "社團介紹與特色簡介": "最熱血的音樂搖籃！不需基礎，學長姐手把手教學！",
         "官方社群平台連結": "https://instagram.com",
         "成果展示影片連結": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-        "封面圖片Base64": "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&auto=format&fit=crop&q=60"
-      },
-      {
-        "社團名稱": "設計工坊社",
-        "社團分類": "藝術類",
-        "活動時間": "每週三下午 14:00 - 16:00",
-        "活動地點": "商教大樓美術教室",
-        "加入預期費用": 450,
-        "社團介紹與特色簡介": "如果你有一顆充滿創意的靈魂，歡迎加入設計工坊社！我們專注於各類手作工藝、皮革雕刻、電腦製圖入門以及基礎視覺設計。不僅可以完成專屬的手作作品，還能在學期末舉辦作品展，讓大家看見你的天馬行空！",
-        "官方社群平台連結": "https://instagram.com",
-        "成果展示影片連結": "",
-        "封面圖片Base64": "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&auto=format&fit=crop&q=60"
-      },
-      {
-        "社團名稱": "羽球社",
-        "社團分類": "體育類",
-        "活動時間": "每週四 16:10 - 17:30",
-        "活動地點": "室內羽球館甲乙場地",
-        "加入預期費用": 200,
-        "社團介紹與特色簡介": "揮灑汗水！熱愛殺球的爽快感嗎？羽球社是本校最熱門的體育性社團。無論你是想精進切球、防守技巧，還是單純想在課後與好友切磋球技、舒緩課業壓力，我們都歡迎你的加入！",
-        "官方社群平台連結": "https://instagram.com",
-        "成果展示影片連結": "",
-        "封面圖片Base64": "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800&auto=format&fit=crop&q=60"
+        "封面圖片Base64": "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800",
+        "審核狀態": "已通過"
       }
     ];
 
     let allClubs = [];
     let currentCategory = "全部";
 
-    // 3. 通用非原生對話框 Modal
+    // 通用 Modal
     function showModal(title, message, type = "info") {
       const modal = document.getElementById('common-modal');
       const container = document.getElementById('common-modal-container-box');
@@ -736,13 +785,13 @@
       msgEl.innerText = message;
 
       if (type === "success") {
-        iconBg.className = "p-3 rounded-full border-2 border-[#5c4d4d] flex-shrink-0 bg-emerald-100 text-emerald-700";
+        iconBg.className = "p-3 rounded-full border-2 border-[#5c4d4d] bg-emerald-100 text-emerald-700";
         icon.setAttribute('data-lucide', 'check-circle');
       } else if (type === "error") {
-        iconBg.className = "p-3 rounded-full border-2 border-[#5c4d4d] flex-shrink-0 bg-red-100 text-red-700";
+        iconBg.className = "p-3 rounded-full border-2 border-[#5c4d4d] bg-red-100 text-red-700";
         icon.setAttribute('data-lucide', 'alert-triangle');
       } else {
-        iconBg.className = "p-3 rounded-full border-2 border-[#5c4d4d] flex-shrink-0 bg-sky-100 text-sky-700";
+        iconBg.className = "p-3 rounded-full border-2 border-[#5c4d4d] bg-sky-100 text-sky-700";
         icon.setAttribute('data-lucide', 'info');
       }
       lucide.createIcons();
@@ -765,7 +814,7 @@
       });
     }
 
-    // 4. 取得社團資料 API
+    // 載入資料 API
     async function loadClubsData() {
       document.getElementById('loading-state').classList.remove('hidden');
       document.getElementById('clubs-grid').classList.add('hidden');
@@ -783,24 +832,21 @@
       }
 
       try {
-        const response = await fetch(`${API_URL}?action=getClubs`);
+        const response = await fetch(`${API_URL}?action=getClubs&_t=${Date.now()}`);
         const result = await response.json();
         if (result.status === "success") {
           allClubs = result.data;
           renderClubs();
           renderCategoryButtons();
+          renderModerationTable(); // 同步刷新審核大廳
         } else {
-          showModal("載入失敗", "無法從試算表取得資料，將套用離線資料代用：\n" + result.message, "error");
+          showModal("載入失敗", "將套用離線資料代用：\n" + result.message, "error");
           allClubs = DEMO_CLUBS_DATA;
           renderClubs();
           renderCategoryButtons();
         }
       } catch (err) {
         console.error("連線 API 失敗:", err);
-        // 如果原本不是管理員解鎖模式，就靜默加載，不彈窗驚擾學生
-        if (!document.getElementById('btn-settings').classList.contains('hidden')) {
-          showModal("連線失敗", "與您的 GAS API 連線中斷或網址無效。目前已為您載入「唯讀離線展示數據」供測試瀏覽。\n請點擊右上角 ⚙️ 齒輪確認連線設定。", "error");
-        }
         allClubs = DEMO_CLUBS_DATA;
         renderClubs();
         renderCategoryButtons();
@@ -810,7 +856,7 @@
       }
     }
 
-    // 5. 渲染社團卡片
+    // 渲染社團卡片（審核過濾器：只會看見狀態為「已通過」的社團）
     function renderClubs() {
       const grid = document.getElementById('clubs-grid');
       grid.innerHTML = "";
@@ -818,11 +864,13 @@
       const searchQuery = document.getElementById('search-input').value.trim().toLowerCase();
 
       const filtered = allClubs.filter(club => {
+        // 🔒 審核過濾安全機制：未設定 API URL（展示模式）不作限制；設定後，一般學生「只看得見已通過的社團」
+        const isApproved = !API_URL || String(club["審核狀態"] || "").trim() === "已通過";
         const matchCategory = (currentCategory === "全部" || club["社團分類"] === currentCategory);
         const name = (club["社團名稱"] || "").toLowerCase();
         const intro = (club["社團介紹與特色簡介"] || "").toLowerCase();
         const matchSearch = !searchQuery || name.includes(searchQuery) || intro.includes(searchQuery);
-        return matchCategory && matchSearch;
+        return isApproved && matchCategory && matchSearch;
       });
 
       if (filtered.length === 0) {
@@ -846,7 +894,8 @@
                <span class="text-xs text-gray-500 font-bold">歡迎點擊查看社團詳情</span>
              </div>`;
 
-        const cost = club["加入預期費用"] !== undefined ? `$${club["加入預期費用"]}` : '免費/未標示';
+        const rawCost = club["加入預期費用"] !== undefined ? club["加入預期費用"] : club["社團費用"];
+        const cost = (rawCost !== undefined && rawCost !== "") ? `$${rawCost}` : '免費/未標示';
 
         card.innerHTML = `
           <div>
@@ -902,7 +951,9 @@
       document.getElementById('detail-category').innerText = club["社團分類"] || "一般分類";
       document.getElementById('detail-time').innerText = club["活動時間"] || "未標示";
       document.getElementById('detail-location').innerText = club["活動地點"] || "未標示";
-      document.getElementById('detail-cost').innerText = club["加入預期費用"] !== undefined ? `$${club["加入預期費用"]} 元` : '未標示';
+      
+      const rawCost = club["加入預期費用"] !== undefined ? club["加入預期費用"] : club["社團費用"];
+      document.getElementById('detail-cost').innerText = (rawCost !== undefined && rawCost !== "") ? `$${rawCost} 元` : '未標示';
       document.getElementById('detail-intro').innerText = club["社團介紹與特色簡介"] || "本社團尚未建立詳細簡介內容。";
 
       const videoContainer = document.getElementById('detail-video-container');
@@ -916,7 +967,7 @@
         }
 
         if (videoId) {
-          videoContainer.innerHTML = `<iframe class="w-full h-full" src="https://www.youtube.com/embed/${videoId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+          videoContainer.innerHTML = `<iframe class="w-full h-full" src="https://www.youtube.com/embed/${videoId}" title="YouTube video player" frameborder="0" allowfullscreen></iframe>`;
           videoContainer.classList.remove('hidden');
           document.getElementById('detail-image-container').classList.add('hidden');
         } else {
@@ -947,6 +998,123 @@
         imgContainer.classList.remove('hidden');
       } else {
         imgContainer.classList.add('hidden');
+      }
+    }
+
+    // 7.5 渲染審核管理大廳列表
+    function renderModerationTable() {
+      const tbody = document.getElementById('moderation-list-rows');
+      tbody.innerHTML = "";
+
+      if (allClubs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-gray-400 font-bold">目前無任何申請填寫紀錄</td></tr>`;
+        return;
+      }
+
+      allClubs.forEach((club) => {
+        const tr = document.createElement('tr');
+        tr.className = "divide-x divide-[#5c4d4d] hover:bg-stone-50 transition-colors text-xs";
+
+        const status = club["審核狀態"] || "待審核";
+        let badgeClass = "bg-amber-100 text-amber-700 border border-amber-300";
+        if (status === "已通過") badgeClass = "bg-emerald-100 text-emerald-700 border border-emerald-300";
+        if (status === "已駁回") badgeClass = "bg-rose-100 text-rose-700 border border-rose-300";
+
+        const name = club["社團名稱"];
+        const category = club["社團分類"] || "未分類";
+        const timePlace = `🕒 ${club["活動時間"] || "未標示"}<br>📍 ${club["活動地點"] || "未標示"}`;
+        
+        const rawCost = club["加入預期費用"] !== undefined ? club["加入預期費用"] : club["社團費用"];
+        const cost = (rawCost !== undefined && rawCost !== "") ? `$${rawCost}` : '未標示';
+
+        tr.innerHTML = `
+          <td class="px-4 py-3 font-bold text-[#4a3e3d]">${name}</td>
+          <td class="px-4 py-3">${category}</td>
+          <td class="px-4 py-3 leading-normal">${timePlace}</td>
+          <td class="px-4 py-3 font-bold text-emerald-600">${cost}</td>
+          <td class="px-4 py-3 text-center">
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold ${badgeClass}">${status}</span>
+          </td>
+          <td class="px-4 py-3">
+            <div class="flex items-center justify-center gap-1.5">
+              <button onclick="updateClubStatus('${name}', '已通過')" class="p-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded border border-emerald-300 transition-all" title="通過審核">
+                <i data-lucide="check" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="updateClubStatus('${name}', '已駁回')" class="p-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded border border-amber-300 transition-all" title="駁回上傳">
+                <i data-lucide="ban" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="deleteClubRecord('${name}')" class="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded border border-rose-200 transition-all" title="徹底刪除">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      lucide.createIcons();
+    }
+
+    // 7.8 遠端更新審核狀態 (核准 / 駁回)
+    async function updateClubStatus(clubName, newStatus) {
+      if (!API_URL) {
+        showModal("無法審核", "目前為【唯讀離線展示模式】。請設定 GAS 網址對接真實資料庫後再進行操作！", "error");
+        return;
+      }
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            action: "updateStatus",
+            name: clubName,
+            status: newStatus
+          })
+        });
+        const result = await response.json();
+
+        if (result.status === "success") {
+          showModal("更新成功 ✨", `已成功將「${clubName}」審核狀態更新為：「${newStatus}」！`, "success");
+          loadClubsData(); // 重新讀取載入，刷新前台列表與審核清冊！
+        } else {
+          showModal("操作失敗", result.message, "error");
+        }
+      } catch (err) {
+        console.error("更新審核狀態出錯：", err);
+        showModal("連線出錯", "無法與 Google 試算表伺服器建立通訊！請檢查連線網址是否正確部署。", "error");
+      }
+    }
+
+    // 7.9 遠端刪除社團資料
+    async function deleteClubRecord(clubName) {
+      if (!API_URL) {
+        showModal("無法刪除", "目前為【唯讀離線展示模式】。請設定 GAS 網址對接真實資料庫後再進行操作！", "error");
+        return;
+      }
+
+      const proceed = await showModal("⚠️ 確定刪除嗎？", `確定要將「${clubName}」的所有資料從 Google 試算表中徹底移除嗎？此操作將不可復原！`, "info");
+      if (!proceed) return;
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            action: "deleteClub",
+            name: clubName
+          })
+        });
+        const result = await response.json();
+
+        if (result.status === "success") {
+          showModal("已成功刪除 🗑️", `「${clubName}」的所有檔案與欄位資料已全數移出資料庫。`, "success");
+          loadClubsData(); // 重新讀取
+        } else {
+          showModal("刪除失敗", result.message, "error");
+        }
+      } catch (err) {
+        console.error("刪除數據異常：", err);
+        showModal("連線出錯", "無法從遠端 Google 試算表刪除數據，請檢查您的網路狀態。", "error");
       }
     }
 
@@ -984,45 +1152,58 @@
       reader.readAsDataURL(file);
     };
 
-    // 9. AI 優化文案（雙模式 + 5次指數退避重試演算法）
+    // 9. AI 優化文案（修復與優化重試邏輯）
     document.getElementById('btn-ai-optimize').onclick = async function() {
       const introText = document.getElementById('form-intro').value.trim();
       if (!introText) {
-        showModal("提示", "請先輸入一些基礎的社團介紹文字，好讓 AI 幫您發揮創意優化！", "info");
+        showModal("提示", "請先輸入一些基礎的介紹文字，讓 AI 幫您優化！", "info");
         return;
       }
 
-      const storedKey = localStorage.getItem('gemini_api_key');
-      const apiKey = storedKey ? storedKey : ""; 
-
-      // 安全防呆：非預覽環境下，如果沒有 API Key，主動阻斷並告知引導
+      const storedKey = localStorage.getItem('gemini_api_key') || "";
       const isCanvasEnv = window.location.hostname.includes("gemini") || window.location.hostname.includes("googleusercontent");
-      if (!apiKey && !isCanvasEnv) {
-        showModal("需要設定 API 金鑰 ⚙️", "💡 溫馨提醒：\n「免金鑰測試」僅支援在 Canvas 預覽環境中進行。\n\n由於您目前在【本機電腦】開啟或已將網頁發佈至網路，請先點擊右上角地圖針校徽 5 次解鎖管理功能（密碼：`ntcvs`），進入「⚙️ 設定」填寫您個人免費申辦的 Gemini API Key，即可享受 AI 美化功能喔！", "info");
+      
+      // 安全防呆：非預覽環境下，如果沒有 API Key，主動阻斷並告知引導
+      if (!storedKey && !isCanvasEnv) {
+        showModal("需要設定 API 金鑰 ⚙", "💡 溫馨提醒：\n「免金鑰測試」僅支援在 Canvas 預覽環境中進行。\n\n由於您目前在【本機電腦】開啟或已將網頁發佈至網路，請先點擊右上角校徽 5 次解鎖管理功能（密碼：`ntcvs`），進入「⚙️ 設定」填寫您個人免費申辦的 Gemini API Key，即可享受 AI 美化功能喔！", "info");
         return;
       }
 
       document.getElementById('btn-ai-optimize').disabled = true;
       document.getElementById('ai-loading-text').classList.remove('hidden');
 
-      const systemPrompt = `你是一位非常有創意的校園社團文案行銷大師。請幫高中生社團將粗糙、簡短的介紹，重新編寫成極具吸引力、充滿青春熱血氣息且資訊通暢的招生介紹文案。字數控制在150-250字之間，請保留原本的活動特色，不要添加不合常理的幻想，語氣要活潑、溫暖且富有感染力。`;
+      const systemPrompt = `你是一位非常有創意的校園社團文案行銷大師。請幫高中生社團將粗糙、簡短的介紹，重新編寫成極具吸引力、充滿青春熱血氣息且資訊通暢的招生介紹文案。字數控制在150-250字之間，語氣要活潑、溫暖且富有感染力。`;
       const userPrompt = `這是我目前草擬的社團介紹，請幫我優化改寫成招生推廣文案：\n"${introText}"`;
 
-      // 執行重試演算法呼叫 API
       try {
-        const optimizedText = await callGeminiAPIWithRetry(userPrompt, systemPrompt, apiKey);
+        const optimizedText = await callGeminiAPIWithRetry(userPrompt, systemPrompt, storedKey);
         if (optimizedText) {
-          document.getElementById('form-intro').value = optimizedText.trim();
-          showModal("優化成功", "AI 文案優化完成！已為您的社團量身打造全新吸睛文案✨", "success");
+          document.getElementById('ai-preview-original').innerText = introText;
+          document.getElementById('ai-preview-optimized').innerText = optimizedText.trim();
+          document.getElementById('ai-preview-modal').classList.remove('hidden');
+          
+          document.getElementById('btn-ai-preview-accept').onclick = function() {
+            document.getElementById('form-intro').value = optimizedText.trim();
+            document.getElementById('ai-preview-modal').classList.add('hidden');
+            showModal("已採用 ✨", "成功套用 AI 招生文案！", "success");
+          };
+          
+          document.getElementById('btn-ai-preview-reject').onclick = function() {
+            document.getElementById('ai-preview-modal').classList.add('hidden');
+          };
+          document.getElementById('btn-close-ai-preview').onclick = function() {
+            document.getElementById('ai-preview-modal').classList.add('hidden');
+          };
         } else {
           throw new Error("EMPTY_RESPONSE");
         }
       } catch (err) {
         console.error("AI 呼叫失敗：", err);
-        if (err.message === "API_KEY_INVALID") {
-          showModal("API Key 錯誤 ❌", "偵測到無效的金鑰！您在設定中填寫的 Gemini API 金鑰不正確，請前往 ⚙️ 設定重新確認您的金鑰是否輸入完整且正確。", "error");
+        if (err.message.includes("PERMANENT_ERROR")) {
+          const detail = err.message.replace("PERMANENT_ERROR: ", "");
+          showModal("金鑰驗證失敗 ❌", `您的 Gemini API 金鑰驗證未通過，無法成功連線 AI 伺服器。\n\n詳細原因：\n${detail}\n\n請連點左上校徽 5 次開啟 ⚙️ 設定檢視金鑰是否正確。`, "error");
         } else {
-          showModal("AI 連線失敗", "目前無法成功呼叫 AI 伺服器，可能原因為網路瞬斷、流量超限（Rate Limit）或 API Key 未設置。\n請稍後再試，或前往 ⚙️ 設定檢視金鑰狀態！", "error");
+          showModal("AI 連線失敗", "目前無法連線 AI 伺服器。若您是在本機或發布網路中運行，請前往設定檢視個人的金鑰狀態，或稍後重試！", "error");
         }
       } finally {
         document.getElementById('btn-ai-optimize').disabled = false;
@@ -1030,15 +1211,20 @@
       }
     };
 
-    // 指數退避重試 API 呼叫函式
+    // 🎯 核心修復：雙軌模型自動適配、指數退避、及時攔截 400/401/403 永久錯誤
     async function callGeminiAPIWithRetry(prompt, systemInstruction, apiKey) {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+      // 智慧雙軌切換：有填寫金鑰時，使用最穩定的常規模型 'gemini-1.5-flash'；無金鑰（Canvas環境）時，使用預覽模型 'gemini-2.5-flash-preview-09-2025'
+      const modelName = apiKey ? "gemini-1.5-flash" : "gemini-2.5-flash-preview-09-2025";
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+      
       const payload = {
         contents: [{ parts: [{ text: prompt }] }],
+        // 同步相容 system_instruction (REST API 標準) 與 systemInstruction (SDK 標準) 確保萬無一失
+        system_instruction: { parts: [{ text: systemInstruction }] },
         systemInstruction: { parts: [{ text: systemInstruction }] }
       };
 
-      let delay = 1000; // 初始延遲 1 秒
+      let delay = 1000;
       for (let attempt = 0; attempt < 5; attempt++) {
         try {
           const response = await fetch(url, {
@@ -1047,33 +1233,26 @@
             body: JSON.stringify(payload)
           });
 
-          // 如果回傳 OK (200)
-          if (response.ok) {
+          // 🎯 智慧錯誤分類：如果是 400（錯誤請求）、401（未授權）、403（金鑰無效/無權限）等永久錯誤，代表 Key 錯了，不要重試直接拋出！
+          if (!response.ok) {
+            if (response.status === 400 || response.status === 401 || response.status === 403) {
+              const errJson = await response.json().catch(() => ({}));
+              const errMsg = errJson.error?.message || `HTTP 錯誤狀態碼 ${response.status}`;
+              throw new Error(`PERMANENT_ERROR: ${errMsg}`);
+            }
+            // 429 流量限額或 503 伺服器忙碌，則進入指數退避重試
+            console.warn(`AI 伺服器忙碌中，進行第 ${attempt + 1} 次重試...`);
+          } else {
             const data = await response.json();
             return data.candidates?.[0]?.content?.parts?.[0]?.text || null;
           }
-
-          // 錯誤碼解析與分類處理
-          if (response.status === 400 || response.status === 403) {
-            const errData = await response.json().catch(() => ({}));
-            const errMessage = errData.error?.message || "";
-            if (errMessage.includes("API key not valid") || errMessage.includes("invalid") || errMessage.includes("not found")) {
-              throw new Error("API_KEY_INVALID");
-            }
-          }
-
-          // 如果是 429 (流量限制) 則不丟 Exception，進入指數退避重試
-          console.warn(`Gemini API 遭遇速率限制或伺服器忙碌中 (嘗試第 ${attempt + 1} 次)...`);
-
         } catch (err) {
-          // 金鑰無效則立即中斷，不再重試浪費資源
-          if (err.message === "API_KEY_INVALID") {
+          // 金鑰無效的 permanent error 必須立刻向上層拋出，不要進入退避等待
+          if (err.message.includes("PERMANENT_ERROR")) {
             throw err;
           }
-          console.warn(`連線遭遇異常，自動重試中...`, err);
+          console.warn(`重試連線中...`, err);
         }
-
-        // 指數延遲：1s -> 2s -> 4s -> 8s -> 16s
         await new Promise(resolve => setTimeout(resolve, delay));
         delay *= 2;
       }
@@ -1085,12 +1264,12 @@
       e.preventDefault();
 
       if (!API_URL) {
-        showModal("無法提交", "您目前處於「唯讀展示模式」。請先解鎖右上角 ⚙️ 設定網頁對接的 GAS API 網址，才能正式新增與儲存資料到 Google 試算表喔！", "error");
+        showModal("無法提交", "您目前處於「唯讀展示模式」。請先解鎖右上角設定對接的 GAS API 網址，才能正式新增與儲存資料喔！", "error");
         return;
       }
 
       if (FORM_CLOSED) {
-        showModal("無法提交", "本屆社團地圖資料填寫通道已經關閉，目前無法接受新的上傳申請！", "error");
+        showModal("無法提交", "本屆填寫通道已經關閉！", "error");
         return;
       }
 
@@ -1122,7 +1301,7 @@
         const result = await response.json();
 
         if (result.status === "success") {
-          await showModal("儲存成功", `🎉 恭喜！「${formData.name}」已成功寫入 Google 試算表資料庫中！`, "success");
+          await showModal("上傳儲存成功！ 🎉", "社團資料已成功寫入，📢 接下來請靜候「台南高商社團活動組」進行資料核對與審核，通過後就會正式公開出現在地圖首頁中囉！\n（若有需修正之內容，請聯絡活動組，請勿重複提交表單）", "success");
           document.getElementById('admin-modal').classList.add('hidden');
           document.getElementById('club-form').reset();
           document.getElementById('image-preview-container').classList.add('hidden');
@@ -1132,7 +1311,7 @@
         }
       } catch (err) {
         console.error("提交失敗：", err);
-        showModal("提交失敗", "無法將資料傳送至 GAS 伺服器，請檢査您的部署狀態或 CORS 設定。", "error");
+        showModal("提交失敗", "無法將資料傳送至 GAS 伺服器。", "error");
       } finally {
         submitBtn.disabled = false;
         submitBtn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> 確定儲存上傳`;
@@ -1140,22 +1319,20 @@
       }
     };
 
-
-    // 11. 密碼鎖定與連動（當點選設定按鈕時，強行要求密碼驗證）
+    // 11. 密碼鎖定與連動
     document.getElementById('btn-settings').onclick = function() {
       const passModal = document.getElementById('password-modal');
       const passContainer = document.getElementById('password-modal-container');
       
-      document.getElementById('input-admin-pass').value = ""; // 清空
+      document.getElementById('input-admin-pass').value = "";
       passModal.classList.remove('hidden');
       setTimeout(() => {
-        passContainer.classList.remove('scale-95', 'opacity-0');
+        passContainer.classList.remove('scale-100', 'opacity-100');
         passContainer.classList.add('scale-100', 'opacity-100');
         document.getElementById('input-admin-pass').focus();
       }, 50);
     };
 
-    // 取消密碼輸入
     document.getElementById('btn-cancel-pass').onclick = function() {
       const passModal = document.getElementById('password-modal');
       const passContainer = document.getElementById('password-modal-container');
@@ -1166,11 +1343,9 @@
       }, 300);
     };
 
-    // 驗證密碼
     document.getElementById('btn-submit-pass').onclick = function() {
       const passInput = document.getElementById('input-admin-pass').value.trim();
       if (passInput === ADMIN_PASSWORD) {
-        // 驗證通過，關閉驗證視窗並開啟設定視窗
         document.getElementById('btn-cancel-pass').click();
         setTimeout(() => {
           document.getElementById('input-gas-url').value = localStorage.getItem('gas_web_app_url') || "";
@@ -1179,8 +1354,18 @@
           document.getElementById('settings-modal').classList.remove('hidden');
         }, 350);
       } else {
-        showModal("密碼錯誤 ❌", "您輸入的管理者驗證密碼不正確！請重新輸入或尋求開發者支援。", "error");
+        showModal("密碼錯誤 ❌", "管理者驗證密碼不正確！", "error");
       }
+    };
+
+    // 審核大廳按鈕點擊事件
+    document.getElementById('btn-moderation').onclick = function() {
+      renderModerationTable();
+      document.getElementById('moderation-modal').classList.remove('hidden');
+    };
+
+    document.getElementById('btn-close-moderation').onclick = () => {
+      document.getElementById('moderation-modal').classList.add('hidden');
     };
 
     document.getElementById('btn-close-settings').onclick = () => {
@@ -1193,7 +1378,7 @@
       const isClosed = document.getElementById('input-close-form').checked;
 
       if (urlVal && !urlVal.startsWith('http')) {
-        showModal("設定錯誤", "請輸入以 http:// 或 https:// 開頭的有效網址！", "error");
+        showModal("設定錯誤", "請輸入有效的 HTTP 網址！", "error");
         return;
       }
 
@@ -1214,7 +1399,7 @@
 
       applySubmissionStateUI();
 
-      await showModal("儲存成功", "您的連線設定與 API 參數已成功快取至瀏覽器！系統將重新載入。", "success");
+      await showModal("儲存成功", "設定已儲存！系統將重新載入。", "success");
       location.reload();
     };
 
@@ -1227,29 +1412,23 @@
       document.getElementById('input-close-form').checked = false;
       FORM_CLOSED = false;
       
-      await showModal("設定已清除", "已成功刪除 LocalStorage 中的所有配置！頁面即將重新整理並鎖定。", "success");
+      await showModal("設定已清除", "設定已重置！頁面即將重新整理。", "success");
       location.reload();
     };
 
-    // 12. 產生分享連結與 QR Code (封裝成帶參數 JSON，自動移除了管理員顯示參數以策安全)
+    // 12. 產生分享連結與 QR Code
     document.getElementById('btn-generate-share').onclick = async function() {
       const currentUrl = localStorage.getItem('gas_web_app_url') || DEFAULT_GAS_URL;
       if (!currentUrl) {
-        showModal("提示", "請先點選上方「儲存設定」按鈕保存您的有效 GAS 網址，才可以產生分享網址喔！", "info");
+        showModal("提示", "請先儲存設定保存有效的 GAS 網址，才可以產生分享網址喔！", "info");
         return;
       }
 
       const isClosed = document.getElementById('input-close-form').checked;
-
-      // 封裝 JSON 資料結構 (其中不帶 admin=true，因此任何人打開此連結都看不見設定按鈕)
-      const configObj = {
-        url: currentUrl,
-        closed: isClosed
-      };
-
+      const configObj = { url: currentUrl, closed: isClosed };
       const base64Str = btoa(JSON.stringify(configObj));
       const hostUrl = window.location.origin + window.location.pathname;
-      const shareLongUrl = `${hostUrl}?config=${base64Str}`; // 正常學生通道網址
+      const shareLongUrl = `${hostUrl}?config=${base64Str}`;
 
       try {
         const qrcodeImg = document.getElementById('share-qrcode-img');
@@ -1259,10 +1438,9 @@
         outputInput.value = shareLongUrl;
 
         document.getElementById('share-result-container').classList.remove('hidden');
-        showModal("生成成功", `🎉 分享連結生成成功！\n學生在您的分享環境中將「不會」看到設定與部署按鈕，確保介面絕對乾淨安全！\n${isClosed ? '🔒 狀態：已關閉填寫通道' : '🔓 狀態：開放填寫中'}\n請點選下方複製網址。`, "success");
+        showModal("生成成功", "🎉 分享連結生成成功！學生一鍵開啟時，設定鍵與說明鍵將完全隱藏。", "success");
       } catch (err) {
-        console.error(err);
-        showModal("錯誤", "二維碼生成遭遇瓶頸，請手動複製網址。", "error");
+        showModal("錯誤", "二維碼生成遭遇瓶頸。", "error");
       }
     };
 
@@ -1270,10 +1448,10 @@
       const outputInput = document.getElementById('output-share-url');
       outputInput.select();
       document.execCommand('copy');
-      showModal("複製成功", "已複製專屬加密分享連結至剪貼簿！", "success");
+      showModal("複製成功", "已複製分享連結至剪貼簿！", "success");
     };
 
-    // 13. 說明 (ℹ️) 與複製 GAS 程式碼
+    // 13. 說明 與 複製 GAS 程式碼
     document.getElementById('btn-info').onclick = function() {
       document.getElementById('info-modal').classList.remove('hidden');
     };
@@ -1284,28 +1462,24 @@
 
     const gasCodeText = `/**
  * 台南高商社團地圖 - GAS 後端主控系統 (Code.gs)
- * 功能：自動化檢測建表、資料庫寫入、資料讀取、API 反向 CORS
+ * 功能：自動化檢測建表、資料庫自動補齊標頭、資料讀取與遠端審核核准、刪除控制
  */
 
 const SHEET_NAME = "社團總表";
 const COLUMN_HEADERS = [
   "社團名稱", "社團分類", "活動時間", "活動地點", 
   "加入預期費用", "社團介紹與特色簡介", "官方社群平台連結", 
-  "成果展示影片連結", "封面圖片Base64"
+  "成果展示影片連結", "封面圖片Base64", "審核狀態"
 ];
 
-// 初始化資料庫工作表
 function initDatabase() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   let sheet = ss.getSheetByName(SHEET_NAME);
-  
   if (!sheet) {
     sheet = ss.insertSheet(SHEET_NAME);
   }
-  
-  // 檢查標頭
   const lastCol = sheet.getLastColumn();
-  if (lastCol === 0) {
+  if (lastCol < COLUMN_HEADERS.length) {
     sheet.getRange(1, 1, 1, COLUMN_HEADERS.length).setValues([COLUMN_HEADERS]);
     sheet.getRange(1, 1, 1, COLUMN_HEADERS.length)
          .setBackground("#ffeeda")
@@ -1315,19 +1489,15 @@ function initDatabase() {
   return sheet;
 }
 
-// 接收 GET 請求
 function doGet(e) {
   const action = e.parameter.action;
   const result = {};
-  
   try {
     const sheet = initDatabase();
-    
     if (action === "getClubs") {
       const data = sheet.getDataRange().getValues();
       const headers = data[0];
       const clubsList = [];
-      
       for (let i = 1; i < data.length; i++) {
         const row = data[i];
         const club = {};
@@ -1336,7 +1506,6 @@ function doGet(e) {
         });
         clubsList.push(club);
       }
-      
       result.status = "success";
       result.data = clubsList;
     } else {
@@ -1347,23 +1516,16 @@ function doGet(e) {
     result.status = "error";
     result.message = err.toString();
   }
-  
-  return ContentService.createTextOutput(JSON.stringify(result))
-                       .setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
 }
 
-// 接收 POST 請求 (新增/更新社團)
 function doPost(e) {
   const action = e.parameter.action;
   const result = {};
-  
   try {
     const sheet = initDatabase();
-    
     if (action === "addClub") {
       const rawData = JSON.parse(e.parameter.data);
-      
-      // 比對欄位並寫入
       const newRow = [
         rawData.name,
         rawData.category,
@@ -1373,12 +1535,49 @@ function doPost(e) {
         rawData.intro,
         rawData.social,
         rawData.video,
-        rawData.image
+        rawData.image,
+        "待審核"
       ];
-      
       sheet.appendRow(newRow);
       result.status = "success";
-      result.message = "社團資料已成功寫入資料庫！";
+      result.message = "社團資料已成功寫入，等候官方活動組審核！";
+    } else if (action === "updateStatus") {
+      const name = e.parameter.name;
+      const status = e.parameter.status; 
+      const data = sheet.getDataRange().getValues();
+      let found = false;
+      for (let i = 1; i < data.length; i++) {
+        if (data[i][0] === name) {
+          sheet.getRange(i + 1, 10).setValue(status);
+          found = true;
+          break;
+        }
+      }
+      if (found) {
+        result.status = "success";
+        result.message = "已更新審核狀態為：" + status;
+      } else {
+        result.status = "error";
+        result.message = "找不到該社團資料。";
+      }
+    } else if (action === "deleteClub") {
+      const name = e.parameter.name;
+      const data = sheet.getDataRange().getValues();
+      let found = false;
+      for (let i = 1; i < data.length; i++) {
+        if (data[i][0] === name) {
+          sheet.deleteRow(i + 1);
+          found = true;
+          break;
+        }
+      }
+      if (found) {
+        result.status = "success";
+        result.message = "已成功刪除該社團資料。";
+      } else {
+        result.status = "error";
+        result.message = "找不到該社團資料。";
+      }
     } else {
       result.status = "error";
       result.message = "無效的 POST 行動。";
@@ -1387,9 +1586,7 @@ function doPost(e) {
     result.status = "error";
     result.message = err.toString();
   }
-  
-  return ContentService.createTextOutput(JSON.stringify(result))
-                       .setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
 }`;
 
     document.getElementById('gas-code-block').innerText = gasCodeText;
@@ -1401,18 +1598,14 @@ function doPost(e) {
       tempTextArea.select();
       try {
         document.execCommand("copy");
-        showModal("複製成功", "GAS 後端程式碼已成功複製至您的剪貼簿！\n請直接至 GAS 編輯器貼上使用。", "success");
+        showModal("複製成功", "GAS 後端程式碼已複製！請至 Apps Script 貼上覆蓋使用並發布新版本。", "success");
       } catch (err) {
-        showModal("複製失敗", "您的瀏覽器不支援一鍵複製，請手動全選複製程式碼。", "error");
+        showModal("複製失敗", "請手動全選複製程式碼。", "error");
       }
       document.body.removeChild(tempTextArea);
     };
 
-    // 其他 UI 控制按鈕
     document.getElementById('btn-close-admin').onclick = () => {
-      document.getElementById('admin-modal').classList.add('hidden');
-    };
-    document.getElementById('btn-cancel-form').onclick = () => {
       document.getElementById('admin-modal').classList.add('hidden');
     };
     document.getElementById('btn-close-detail').onclick = () => {
@@ -1420,7 +1613,6 @@ function doPost(e) {
       document.getElementById('detail-video-container').innerHTML = ""; 
     };
 
-    // 重設篩選
     document.getElementById('btn-reset-filters').onclick = () => {
       currentCategory = "全部";
       document.getElementById('search-input').value = "";
@@ -1428,12 +1620,10 @@ function doPost(e) {
       renderClubs();
     };
 
-    // 搜尋即時連動
     document.getElementById('search-input').oninput = () => {
       renderClubs();
     };
 
-    // 頁面初次載入
     window.onload = function() {
       initGasUrl();
       loadClubsData();
